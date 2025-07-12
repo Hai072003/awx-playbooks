@@ -1,0 +1,7 @@
+---
+- name: Ping Mikrotik device
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ping device
+      ping:
