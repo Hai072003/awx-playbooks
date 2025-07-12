@@ -1,11 +1,11 @@
-- name: Ping A1 via SNMP
-  hosts: localhost
+- name: Ping Mikrotik from Ubuntu server
+  hosts: ubuntu-server
   gather_facts: no
   tasks:
-    - name: SNMP check A1
-      ansible.builtin.command: snmpwalk -v2c -c public 10.20.25.19
-      register: snmp_result
+    - name: Ping Mikrotik router at 10.20.25.19
+      ansible.builtin.shell: ping -c 4 10.20.25.19
+      register: ping_result
 
-    - name: Show SNMP result
+    - name: Show ping result
       debug:
-        var: snmp_result.stdout_lines
+        var: ping_result.stdout_lines
