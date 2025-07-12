@@ -1,11 +1,11 @@
-- name: Ping Mikrotik Router
-  hosts: all
+- name: Ping Mikrotik from Ubuntu server
+  hosts: localhost
   gather_facts: no
   tasks:
-    - name: Test connectivity to Mikrotik
-      ansible.builtin.ping:
-      vars:
-        ansible_connection: ssh  # Sử dụng SSH thay vì network_cli
-        ansible_user: haiTT
-        ansible_password: Hai123456@
-        ansible_network_os: routeros  # Tùy chọn, giữ nếu cần
+    - name: Ping Mikrotik router at 10.20.25.19
+      ansible.builtin.command: ping -c 4 10.20.25.19
+      register: ping_result
+
+    - name: Show ping result
+      debug:
+        var: ping_result.stdout_lines
