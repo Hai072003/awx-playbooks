@@ -3,7 +3,7 @@
   gather_facts: no
   tasks:
     - name: Ping Mikrotik router at 10.20.25.19
-      ansible.builtin.command: ping -c 4 10.20.25.19
+      ansible.builtin.shell: ping -c 4 10.20.25.19
       register: ping_result
 
     - name: Show ping result
