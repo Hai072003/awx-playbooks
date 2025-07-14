@@ -1,14 +1,13 @@
-- name: SSH vào Mikrotik và ping IP
-  hosts: mikrotik
+- name: Ping from Mikrotik Router
+  hosts: all
   gather_facts: no
-  collections:
-    - ansible.netcommon
   tasks:
     - name: Ping IP 10.21.24.12 từ thiết bị Mikrotik
-      cli_command:
-        command: /tool ping 10.21.24.12 count=4
-      register: ping_output
-
-    - name: Hiển thị kết quả ping
-      debug:
-        var: ping_output.stdout_lines
+      community.network.routeros_command:
+        commands:
+          - /ping 10.21.24.12 count=5
+      vars:
+        ansible_connection: ssh
+        ansible_user: haiTT
+        ansible_password: Hai123456@
+        ansible_network_os: routeros
