@@ -1,11 +1,12 @@
-- name: Ping Mikrotik from Ubuntu server
-  hosts: ubuntu-server
+- name: SSH vào thiết bị Mikrotik và ping đến 10.21.24.12
+  hosts: mikrotik
   gather_facts: no
   tasks:
-    - name: Ping Mikrotik router at 10.20.25.19
-      ansible.builtin.shell: ping -c 4 10.20.25.19
-      register: ping_result
+    - name: Ping IP 10.21.24.12 từ thiết bị Mikrotik
+      ansible.netcommon.cli_command:
+        command: ping 10.21.24.12
+      register: ping_output
 
-    - name: Show ping result
+    - name: Hiển thị kết quả ping
       debug:
-        var: ping_result.stdout_lines
+        var: ping_output.stdout_lines
