@@ -1,12 +1,15 @@
-- name: Verify SSH to Mikrotik Router
-  hosts: all
+- name: Kiểm tra kết nối SSH tới Mikrotik
+  hosts: A1
   gather_facts: no
   tasks:
-    - name: Verify SSH connectivity to Mikrotik
+    - name: Đợi kết nối qua SSH
       ansible.builtin.wait_for_connection:
-      vars:
-        ansible_connection: ssh
-        ansible_user: haiTT
-        ansible_password: Hai123456@
-      register: ssh_result
-      failed_when: ssh_result.failed or ssh_result.unreachable
+
+    - name: Lấy hostname Mikrotik
+      ansible.netcommon.cli_command:
+        command: /system identity print
+      register: output
+
+    - name: In ra kết quả
+      debug:
+        var: output.stdout_lines
