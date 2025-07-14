@@ -1,10 +1,12 @@
-- name: SSH vào thiết bị Mikrotik và ping đến 10.21.24.12
+- name: SSH vào Mikrotik và ping IP
   hosts: mikrotik
   gather_facts: no
+  collections:
+    - ansible.netcommon
   tasks:
     - name: Ping IP 10.21.24.12 từ thiết bị Mikrotik
-      ansible.netcommon.cli_command:
-        command: ping 10.21.24.12
+      cli_command:
+        command: /tool ping 10.21.24.12 count=4
       register: ping_output
 
     - name: Hiển thị kết quả ping
