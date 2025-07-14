@@ -1,13 +1,12 @@
-- name: Ping from Mikrotik Router
+- name: Verify SSH to Mikrotik Router
   hosts: all
   gather_facts: no
   tasks:
-    - name: Ping IP 10.21.24.12 từ thiết bị Mikrotik
-      community.network.routeros_command:
-        commands:
-          - /ping 10.21.24.12 count=5
+    - name: Verify SSH connectivity to Mikrotik
+      ansible.builtin.wait_for_connection:
       vars:
         ansible_connection: ssh
         ansible_user: haiTT
         ansible_password: Hai123456@
-        ansible_network_os: routeros
+      register: ssh_result
+      failed_when: ssh_result.failed or ssh_result.unreachable
