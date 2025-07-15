@@ -2,7 +2,9 @@
   hosts: all
   gather_facts: no
   tasks:
-    - name: Verify SSH connectivity to Mikrotik
-      ansible.builtin.wait_for_connection:
-      register: ssh_result
-      failed_when: ssh_result.failed or ssh_result.unreachable
+    - name: Verify connectivity to Mikrotik
+      community.network.routeros_command:
+        commands:
+          - /system identity print
+      register: conn_result
+      failed_when: conn_result.failed or 'error' in conn_result.stdout
