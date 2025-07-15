@@ -2,12 +2,7 @@
   hosts: all
   gather_facts: no
   tasks:
-    - name: Verify connectivity to Mikrotik
-      ansible.netcommon.net_ping:
-      vars:
-        ansible_connection: network_cli
-        ansible_network_os: routeros
-        ansible_user: haiTT
-        ansible_password: Hai123456@
-      register: ping_result
-      failed_when: ping_result.failed or ping_result.unreachable
+    - name: Verify SSH connectivity to Mikrotik
+      ansible.builtin.wait_for_connection:
+      register: ssh_result
+      failed_when: ssh_result.failed or ssh_result.unreachable
