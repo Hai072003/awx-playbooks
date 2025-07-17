@@ -3,14 +3,6 @@
   gather_facts: no
   collections:
     - community.network
-  pre_tasks:
-    - name: Ensure community.network collection is installed
-      ansible.builtin.command: ansible-galaxy collection install community.network
-      args:
-        chdir: /tmp
-      register: install_result
-      changed_when: install_result.rc == 0
-      failed_when: install_result.rc != 0
   tasks:
     - name: Verify connectivity to Mikrotik
       community.network.routeros_command:
@@ -18,10 +10,3 @@
           - /system identity print
       register: conn_result
       failed_when: conn_result.failed or 'error' in conn_result.stdout
-
-    - name: Get interface status (example command)
-      community.network.routeros_command:
-        commands:
-          - /interface print
-      register: interface_result
-      when: conn_result is success
