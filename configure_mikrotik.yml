@@ -1,16 +1,16 @@
-- name: Verify SSH to Mikrotik (Read-only check)
+- name: Ping test from Mikrotik
   hosts: all
   gather_facts: no
   collections:
     - community.routeros
 
   tasks:
-    - name: Show system identity (hostname)
+    - name: Ping 10.21.24.12 from Mikrotik
       routeros_command:
         commands:
-          - /system identity print
-      register: identity_result
+          - /ping 10.21.24.12 count=4
+      register: ping_result
 
-    - name: Show result
+    - name: Show ping result
       debug:
-        var: identity_result.stdout_lines
+        var: ping_result.stdout_lines
