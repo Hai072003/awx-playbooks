@@ -1,17 +1,16 @@
-- name: Verify SSH and Manage Mikrotik Router
-  hosts: all
+- name: Verify SSH to Mikrotik (Read-only check)
+  hosts: mikrotik
   gather_facts: no
   collections:
     - community.routeros
 
   tasks:
-    - name: Verify connectivity to Mikrotik
+    - name: Show system identity (hostname)
       routeros_command:
         commands:
           - /system identity print
-      register: conn_result
-      failed_when: conn_result.failed or 'error' in conn_result.stdout
+      register: identity_result
 
-    - name: Hiển thị kết quả
+    - name: Show result
       debug:
-        var: conn_result.stdout_lines
+        var: identity_result.stdout_lines
