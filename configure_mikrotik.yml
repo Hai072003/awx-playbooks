@@ -11,3 +11,7 @@
           - /system identity print
       register: conn_result
       failed_when: conn_result.failed or 'error' in conn_result.stdout
+
+    - name: Hiển thị kết quả
+      debug:
+        var: conn_result.stdout_lines
