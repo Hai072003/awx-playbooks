@@ -2,10 +2,11 @@
   hosts: all
   gather_facts: no
   collections:
-    - community.network
+    - community.routeros
+
   tasks:
     - name: Verify connectivity to Mikrotik
-      community.routeros.routeros_command:
+      routeros_command:
         commands:
           - /system identity print
       register: conn_result
