@@ -5,7 +5,7 @@
     - community.network
   tasks:
     - name: Verify connectivity to Mikrotik
-      community.network.routeros_command:
+      community.routeros.routeros_command:
         commands:
           - /system identity print
       register: conn_result
