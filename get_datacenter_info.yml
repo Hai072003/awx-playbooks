@@ -1,6 +1,11 @@
 - name: Lấy danh sách VM từ VMware vCenter/ESXi
   hosts: 10.20.4.9
   gather_facts: false
+  vars:
+    vmware_host: "10.20.4.9"
+    vmware_user: "administrator@vsphere.local"
+    vmware_password: "MẬT_KHẨU_CỦA_BẠN"
+    vmware_validate_certs: false
   tasks:
     - name: Lấy danh sách các máy ảo
       community.vmware.vmware_vm_info:
@@ -10,6 +15,10 @@
         validate_certs: "{{ vmware_validate_certs }}"
       register: vm_info
 
-    - name: In danh sách VM
+    - name: In danh sách VM (tên, IP, MAC)
       debug:
-        var: vm_info.virtual_machines
+        msg: |
+          Tên máy ảo: {{ item.guest_name }}
+          IP: {{ item.ip_address | default('N/A') }}
+          MAC: {{ item.mac_address | join(', ') if item.mac_address is defined else 'N/A' }}
+      loop: "{{ vm_info.virtual_machines }}"
