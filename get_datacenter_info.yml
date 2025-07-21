@@ -1,5 +1,5 @@
 - name: Lấy danh sách VM từ VMware vCenter/ESXi
-  hosts: all
+  hosts: 10.20.4.9
   gather_facts: false
   tasks:
     - name: Lấy danh sách các máy ảo
