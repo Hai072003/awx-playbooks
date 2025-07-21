@@ -7,9 +7,9 @@
         hostname: "{{ vmware_host }}"
         username: "{{ vmware_user }}"
         password: "{{ vmware_password }}"
-        validate_certs: false
+        validate_certs: "{{ vmware_validate_certs }}"
       register: vm_info
 
-    - name: In kết quả
+    - name: In danh sách VM
       debug:
         var: vm_info.virtual_machines
