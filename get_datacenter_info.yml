@@ -1,15 +1,19 @@
 ---
-- name: Gather VMware Datacenter Info
-  hosts: 10.20.4.9
+- name: Lấy danh sách VM từ VMware vCenter/ESXi
+  hosts: localhost
   gather_facts: no
+  collections:
+    - community.vmware
+
   tasks:
-    - name: Get datacenter information
-      community.vmware.vmware_datacenter_info:
-        hostname: "10.20.4.9"
-        username: "zabbix"
-        password: "Phenikaa@#2025*!"
+    - name: Lấy danh sách các máy ảo
+      vmware_vm_info:
+        hostname: "{{ vmware_host }}"
+        username: "{{ vmware_user }}"
+        password: "{{ vmware_password }}"
         validate_certs: no
-      register: datacenter_info
-    - name: Display datacenter info
+      register: vm_list
+
+    - name: In danh sách máy ảo
       debug:
-        msg: "{{ datacenter_info.datacenters | default([]) }}"
+        var: vm_list.virtual_machines
