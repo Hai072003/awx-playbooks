@@ -1,6 +1,6 @@
 ---
 - name: Gather VMware Datacenter Info
-  hosts: localhost
+  hosts: 10.20.4.9
   gather_facts: no
   tasks:
     - name: Get datacenter information
@@ -12,4 +12,4 @@
       register: datacenter_info
     - name: Display datacenter info
       debug:
-        msg: "{{ datacenter_info.datacenters }}"
+        msg: "{{ datacenter_info.datacenters | default([]) }}"
