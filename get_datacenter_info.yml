@@ -1,20 +1,15 @@
 - name: Lấy danh sách VM từ VMware vCenter/ESXi
-  hosts: localhost
+  hosts: vcenter_phenikaa  # Không dùng localhost nữa
   gather_facts: false
-  vars:
-    vmware_host: "https://10.20.4.9/sdk"
-    vmware_user: "zabbix"
-    vmware_password: "Phenikaa@#2025*!"
-    validate_certs: false
   tasks:
     - name: Lấy danh sách các máy ảo
       community.vmware.vmware_vm_info:
         hostname: "{{ vmware_host }}"
         username: "{{ vmware_user }}"
         password: "{{ vmware_password }}"
-        validate_certs: "{{ validate_certs }}"
+        validate_certs: false
       register: vm_info
 
-    - name: In danh sách các máy ảo
+    - name: In kết quả
       debug:
         var: vm_info.virtual_machines
