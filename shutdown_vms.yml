@@ -1,0 +1,48 @@
+---
+- name: Shutdown all VMs
+  hosts: localhost
+  become: false
+  collections:
+    - community.vmware
+  tasks:
+    - name: Check UPS condition
+      ansible.builtin.assert:
+        that:
+          - extra_vars.battery_level | float < 20
+          - extra_vars.power_status == "OnBattery"
+        fail_msg: "UPS conditions not met for shutdown"
+      when: extra_vars.battery_level is defined and extra_vars.power_status is defined
+
+    - name: Get list of VMs
+      community.vmware.vmware_vm_inventory:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+      register: vm_list
+      when: extra_vars.battery_level | float < 20 and extra_vars.power_status == "OnBattery"
+
+    - name: Shutdown all VMs
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        name: "{{ item.name }}"
+        state: shutdown-guest
+        state_change_timeout: 120
+      loop: "{{ vm_list.virtual_machines }}"
+      ignore_errors: true
+      when: extra_vars.battery_level | float < 20 and extra_vars.power_status == "OnBattery"
+
+    - name: Force power off if shutdown fails
+      community.vmware.vmware_guest_powerstate:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        name: "{{ item.name }}"
+        state: powered-off
+      loop: "{{ vm_list.virtual_machines }}"
+      when: item.state != "poweredoff" and extra_vars.battery_level | float < 20 and extra_vars.power_status == "OnBattery"
+      ignore_errors: true
