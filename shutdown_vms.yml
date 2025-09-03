@@ -1,6 +1,12 @@
-- name: Shutdown Ubuntu Server
+- name: Shutdown Ubuntu Server (fire-and-forget)
   hosts: all
+  gather_facts: false
+  become: true
+  become_method: sudo
+
   tasks:
-    - name: Shut down the Ubuntu server
-      ansible.builtin.command: /sbin/shutdown -h now
-      become: yes
+    - name: Trigger shutdown now
+      ansible.builtin.command: /sbin/shutdown -h now "Triggered by AWX"
+      async: 1
+      poll: 0
+      changed_when: true
