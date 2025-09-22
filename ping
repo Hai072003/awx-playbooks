@@ -1,0 +1,20 @@
+# ping-10.21.24.12.yml
+---
+- name: ICMP ping 10.21.24.12 từ AWX/Controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Gửi 4 gói ping
+      ansible.builtin.command: "ping -c 4 -W 2 10.21.24.12"
+      register: ping_out
+      changed_when: false
+      failed_when: ping_out.rc != 0
+
+    - name: Đảm bảo 0% packet loss 
+      ansible.builtin.assert:
+        that:
+          - "' 0% packet loss' in ping_out.stdout"
+        success_msg: "OK: 10.21.24.12 reachable (0% packet loss)"
+        fail_msg: "Cảnh báo: có mất gói hoặc độ trễ cao\n{{ ping_out.stdout }}"
