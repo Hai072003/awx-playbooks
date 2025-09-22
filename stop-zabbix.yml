@@ -1,62 +1,27 @@
-# stop-zabbix.yml
+# stop-zabbix-min.yml
 ---
-- name: Stop Zabbix services
+- name: Stop Zabbix & verify
   hosts: all
   become: true
-  gather_facts: true
+  gather_facts: false
 
   vars:
-    # Ghi đè trong Extra Vars nếu cần
-    zabbix_services: ["zabbix-server"]
-    zabbix_disable_on_boot: false
+    zabbix_services: ["zabbix-server"]   # thêm "zabbix-agent2" nếu cần
 
   tasks:
-    - name: Map tên dịch vụ theo họ HĐH
-      set_fact:
-        zbx_service_map:
-          Debian:
-            "zabbix-server": "zabbix-server"
-          RedHat:
-            "zabbix-server": "zabbix-server"
-    - name: Lấy map dịch vụ cho OS hiện tại (fallback rỗng nếu không có)
-      set_fact:
-        svc_map_current: "{{ zbx_service_map[ansible_facts.os_family] | default({}) }}"
-
-    - name: Chuẩn hoá danh sách dịch vụ theo OS hiện tại
-      # Chỉ giữ các key tồn tại trong map, rồi 'extract' để lấy tên thực tế
-      set_fact:
-        zbx_services_resolved: >-
-          {{
-            zabbix_services
-            | select('in', svc_map_current.keys())
-            | map('extract', svc_map_current)
-            | list
-          }}
-
-    - name: Dừng dịch vụ Zabbix mong muốn
+    - name: Stop services
       ansible.builtin.service:
         name: "{{ item }}"
         state: stopped
-        enabled: "{{ (zabbix_disable_on_boot | bool) | ternary(false, omit) }}"
-      loop: "{{ zbx_services_resolved }}"
-      register: stop_results
+      loop: "{{ zabbix_services }}"
 
-    - name: Thu thập trạng thái dịch vụ sau khi dừng
-      ansible.builtin.command: "systemctl is-active {{ item }}"
-      loop: "{{ zbx_services_resolved }}"
-      register: status_check
-      changed_when: false
+    - name: Read service states
+      ansible.builtin.service_facts:
 
-    - name: Báo lỗi nếu dịch vụ vẫn đang active
+    - name: Ensure services are stopped
       ansible.builtin.assert:
         that:
-          - "'active' not in item.stdout"
-        fail_msg: "Dịch vụ {{ item.item }} vẫn đang active"
-        success_msg: "Dịch vụ {{ item.item }} đã dừng"
-      loop: "{{ status_check.results }}"
-
-    - name: Tóm tắt
-      ansible.builtin.debug:
-        msg:
-          resolved_services: "{{ zbx_services_resolved }}"
-          stopped_changed: "{{ stop_results.results | selectattr('changed') | map(attribute='name') | list }}"
+          - "ansible_facts.services['{{ item }}.service'].state == 'stopped'"
+        fail_msg: "Service {{ item }} vẫn đang chạy"
+        success_msg: "Service {{ item }} đã dừng"
+      loop: "{{ zabbix_services }}"
