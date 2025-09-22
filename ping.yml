@@ -1,20 +1,17 @@
-# tcp-check-10.21.24.12.yml
+# ping-from-ubuntu.yml
 ---
-- name: TCP check tới 10.21.24.12:22 từ AWX/Controller
-  hosts: localhost
-  connection: local
+- name: Ping 10.21.24.12 từ host ubuntu (inventory)
+  hosts: ubuntu
   gather_facts: false
+  become: false
 
   tasks:
-    - name: Đợi cổng 22 mở (timeout 3s)
-      ansible.builtin.wait_for:
-        host: 10.21.24.12
-        port: 22
-        timeout: 3
-      register: tcp_ok
+    - name: ICMP ping
+      ansible.builtin.command: "/usr/bin/ping -c 4 -W 2 10.21.24.12"
+      register: ping_out
+      changed_when: false
+      failed_when: ping_out.rc != 0
 
-    - name: Xác nhận reachable
-      ansible.builtin.assert:
-        that: tcp_ok.elapsed is defined
-        success_msg: "OK: 10.21.24.12 reachable qua TCP/22"
-        fail_msg: "Không reach được TCP/22"
+    - name: In kết quả
+      ansible.builtin.debug:
+        var: ping_out.stdout
