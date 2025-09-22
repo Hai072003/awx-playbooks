@@ -1,0 +1,66 @@
+# stop-zabbix.yml
+---
+- name: Stop Zabbix services
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # Danh sách dịch vụ muốn dừng (ghi đè trong AWX > Extra Vars nếu cần)
+    zabbix_services: ["zabbix-server", "zabbix-agent2"]
+    # Chỉ dừng (stopped) hay dừng kèm tắt tự khởi động (disable)
+    zabbix_disable_on_boot: false
+
+  tasks:
+    - name: Map tên dịch vụ theo hệ
+      set_fact:
+        zbx_service_map:
+          Debian:
+            "zabbix-server": "zabbix-server"
+            "zabbix-agent": "zabbix-agent"
+            "zabbix-agent2": "zabbix-agent2"
+            "zabbix-proxy": "zabbix-proxy"
+            "nginx": "nginx"
+            "apache": "apache2"
+          RedHat:
+            "zabbix-server": "zabbix-server"
+            "zabbix-agent": "zabbix-agent"
+            "zabbix-agent2": "zabbix-agent2"
+            "zabbix-proxy": "zabbix-proxy"
+            "nginx": "nginx"
+            "apache": "httpd"
+
+    - name: Chuẩn hoá tên dịch vụ theo OS hiện tại
+      vars:
+        fam: "{{ ansible_facts.os_family }}"
+      set_fact:
+        zbx_services_resolved: >-
+          {{
+            zabbix_services
+            | map('extract', zbx_service_map.get(fam, {}), default=None)
+            | list
+            | reject('equalto', None)
+            | list
+          }}
+
+    - name: Dừng dịch vụ Zabbix mong muốn
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: stopped
+        enabled: "{{ (zabbix_disable_on_boot | bool) | ternary(false, omit) }}"
+      loop: "{{ zbx_services_resolved }}"
+      register: stop_results
+
+    - name: Kiểm tra trạng thái sau khi dừng
+      ansible.builtin.command: "systemctl is-active {{ item }}"
+      loop: "{{ zbx_services_resolved }}"
+      register: status_check
+      changed_when: false
+      failed_when: "'active' in status_check.stdout"
+
+    - name: In tóm tắt kết quả
+      ansible.builtin.debug:
+        msg:
+          - "Đã xử lý các dịch vụ: {{ zbx_services_resolved }}"
+          - "Kết quả stop: {{ stop_results.results | map(attribute='name') | list }}"
+
