@@ -12,6 +12,6 @@
       changed_when: false
       failed_when: ping_out.rc != 0
 
-    - name: In kết quả
+    - name: In kết quả từng dòng
       ansible.builtin.debug:
-        var: ping_out.stdout
+        msg: "{{ ping_out.stdout_lines }}"
